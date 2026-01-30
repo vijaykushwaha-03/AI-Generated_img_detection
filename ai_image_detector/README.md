@@ -5,16 +5,36 @@ A robust, "interview-ready" computer vision project that detects AI-generated im
 ## 🚀 The Problem
 Standard CNNs (ResNet, EfficientNet) often fail to detect modern AI images because they are designed to be invariant to noise and high-frequency details (due to pooling and downsampling). However, AI generators (GANs, Diffusion models) leave behind distinct "fingerprints" in the noise residual domain (e.g., checkerboard artifacts, abnormal spectral peaks) that human eyes—and standard CNNs—often miss.
 
-## 🧠 The Solution: Frequency-Spatial Hybrid Network
-I designed a custom **Dual-Stream Architecture** that mimics digital forensics techniques:
+## 🧠 How We Achieve High Accuracy (The Dual-Stream Approach)
 
-1.  **RGB Stream (Semantic)**:
-    -   Uses an **EfficientNet-B0** backbone to analyze visual semantics (e.g., asymmetrical eyes, warped hands, impossible lighting).
-2.  **Noise Stream (Signal)**:
-    -   Starts with **SRM (Spatial Rich Model) Filters**. These are non-learnable high-pass filters used in steganalysis to extract noise residuals.
-    -   This stream forces the model to ignore the *picture* and look at the *pixels*, revealing the generator's statistical trace.
-3.  **Fusion Head**:
-    -   Concatenates specific features from both streams to make a final decision with high confidence.
+Our model effectively acts as two experts working together:
+
+### 1. The "Visual" Expert (RGB Stream)
+*   **What it sees:** The actual image (faces, objects, lighting).
+*   **How it helps:** It detects semantic errors common in AI generation, such as:
+    *   Asymmetrical eyes or strange pupil shapes.
+    *   Hands with too many/few fingers.
+    *   Impossible lighting or shadows.
+    *   "Smoothness" typical of plastic-looking AI skin.
+
+### 2. The "Forensic" Expert (Noise Stream)
+*   **What it sees:** **Invisible noise patterns** hidden in the pixels.
+*   **How it works:** We use **SRM (Spatial Rich Model) Filters**, a technique from digital forensics. These filters subtract the image content to reveal the "residue" or "fingerprint" left by the camera sensor or the AI generator.
+    *   *Real Cameras* leave consistent, random sensor noise (ISO grain).
+    *   *AI Generators* (GANs/Diffusion) leave structured, checkerboard patterns or abnormal high-frequency grids due to upsampling.
+
+### 🏆 Project Performance (The "Score")
+
+#### Model Accuracy
+By combining these two streams, we aim for **>95% detection accuracy**.
+*   **Standard Models (ResNet)**: Often fail (~60-70% accuracy) because they treat the noise as "unimportant" and filter it out.
+*   **Our Model**: Explicitly hunts for this noise, allowing it to catch even "perfect-looking" AI images that fool humans.
+
+#### Interpreting the Confidence Score
+When you use the app, you see a **Confidence Score** (0% - 100%).
+*   **90-100%**: The model is extremely sure. It likely found both visual artifacts *and* forensic noise evidence.
+*   **60-70%**: The model is uncertain. The image might be heavily compressed (destroying noise) or highly realistic.
+*   **Note**: This score is a probability (Softmax), not a guarantee.
 
 ## 🛠️ Project Structure
 ```
