@@ -5,3 +5,4 @@ ai_image_detector/models/
 __pycache__/
 *.pyc
 
+training_log.txt
